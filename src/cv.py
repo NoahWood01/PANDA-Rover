@@ -24,7 +24,7 @@ def template_match(input_image, source_template, method=cv.TM_CCOEFF_NORMED):
     https://docs.opencv.org/4.x/d4/dc6/tutorial_py_template_matching.html
     """
     # confidence threshold for cv detection
-    THRESHOLD = 0.5
+    THRESHOLD = 0.8
 
     img_rgb = cv.imread(input_image)
     img_gray = cv.cvtColor(img_rgb, cv.COLOR_BGR2GRAY)
@@ -37,3 +37,4 @@ def template_match(input_image, source_template, method=cv.TM_CCOEFF_NORMED):
     for pt in zip(*loc[::-1]):
         cv.rectangle(img_rgb, pt, (pt[0] + w, pt[1] + h), (0, 255, 0), 2)
     cv.imwrite('res.png', img_rgb)
+
