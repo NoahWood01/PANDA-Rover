@@ -3,7 +3,8 @@ import numpy as np
 import sys
 import time
 
-from cv import detect_qr_code, template_match
+from cv.cv import detect_qr_code, template_match
+import ros
 
 
 # print(cv.__version__)
