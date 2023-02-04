@@ -2,6 +2,9 @@
 
 """
 Subscriber to realsense camera.
+
+ROS nodes need to be added to CMakeLists.txt
+under catkin_install_python(PROGRAMS ...
 """
 
 import rospy
