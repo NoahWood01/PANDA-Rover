@@ -3,6 +3,8 @@
 """
 Subscriber to realsense camera.
 
+Takes input from realsense depth view and gives estimated distance of center pixel
+
 ROS nodes need to be added to CMakeLists.txt
 under catkin_install_python(PROGRAMS ...
 """
@@ -17,9 +19,9 @@ class ImageListener:
     def __init__(self, topic):
         self.topic = topic
         self.bridge = CvBridge()
-        self.sub = rospy.Subscriber(topic, msg_Image, self.imageDepthCallback)
+        self.sub = rospy.Subscriber(topic, msg_Image, self.image_depth_callback)
 
-    def imageDepthCallback(self, data):
+    def image_depth_callback(self, data):
         try:
             cv_image = self.bridge.imgmsg_to_cv2(data, data.encoding)
             pix = (data.width/2, data.height/2)

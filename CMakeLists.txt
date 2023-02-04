@@ -160,7 +160,8 @@ include_directories(
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
-   src/ros/realsense.py
+   src/ros/realsense_depth.py
+   src/ros/realsense_image.py
    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
