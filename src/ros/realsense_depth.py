@@ -15,7 +15,7 @@ from cv_bridge import CvBridge, CvBridgeError
 import sys
 import os
 
-class ImageListener:
+class DepthImageListener:
     def __init__(self, topic):
         self.topic = topic
         self.bridge = CvBridge()
@@ -35,6 +35,6 @@ class ImageListener:
 if __name__ == '__main__':
     rospy.init_node("depth_image_processor")
     topic = '/camera/depth/image_rect_raw'  # check the depth image topic in your Gazebo environmemt and replace this with your
-    listener = ImageListener(topic)
+    listener = DepthImageListener(topic)
     print('realsense subscriber listening!')
     rospy.spin()

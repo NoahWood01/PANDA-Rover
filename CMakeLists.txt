@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+  rospy_tutorials
 )
 
 ## System dependencies are found with CMake's conventions
@@ -162,6 +163,8 @@ include_directories(
 catkin_install_python(PROGRAMS
    src/ros/realsense_depth.py
    src/ros/realsense_image.py
+   src/ros/test.py
+   src/ros/image_processing.py
    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
