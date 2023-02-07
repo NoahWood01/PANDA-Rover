@@ -39,8 +39,8 @@ class ImageListener:
             pix = (data.width/2, data.height/2)
             sys.stdout.write('%s: cv image data at center(%d, %d): %s\r' % (self.topic, pix[0], pix[1], np.array_str(cv_image[pix[1], pix[0]])))
             sys.stdout.flush()
-            print(cv_image.shape)
-            cv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY).flatten()
+            # cv_image = cv_image.flatten()
+            cv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB).flatten()
             self.cv_image = cv_image.astype(np.float32)
         except CvBridgeError as e:
             print(e)
@@ -53,8 +53,8 @@ if __name__ == '__main__':
     topic = '/camera/color/image_raw' 
     listener = ImageListener(topic)
     print('realsense subscriber listening!')
+    print('image_data publishing!')
     while not rospy.is_shutdown():
-        print(listener.cv_image)
         pub.publish(listener.cv_image)
         rate.sleep()
         

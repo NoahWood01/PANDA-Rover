@@ -26,17 +26,15 @@ class ImageDataListener:
 
     def data_callback(self, data):
         try:
-            sys.stdout.write("%s \r" % str(self.reshape_to_2d(data)))
+            cv_image = self.reshape_image(data)
+            sys.stdout.write("%s Image shape: %s \r" % (self.topic, str(cv_image.shape)))
             sys.stdout.flush()
         except Exception as e:
             print(e)
             return
 
-    def reshape_to_2d(self, data):
-        # print(os.getcwd())
-        cv_image = np.reshape(data.data, (-1, 640))
-        print(cv_image.shape)
-        print(cv2.imwrite('gray_img.png', cv_image))
+    def reshape_image(self, data):
+        cv_image = np.reshape(data.data, (-1, 640, 3))
         return cv_image
 
 if __name__ == '__main__':
