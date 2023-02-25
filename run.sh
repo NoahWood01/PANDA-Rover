@@ -27,6 +27,15 @@ if [[ $name == "test" ]]; then
 elif [[ $name == "start" ]]; then
     # Start stuff goes here
     echo "Startup initiated"
+
+    roscore &>/dev/null &
+    # wait for ros boot up
+    echo "roscore up"
+    sleep 5
+    roslaunch realsense2_camera rs_camera.launch &>/dev/null &
+    echo "realsense ros node launched"
+    sleep 1
+
     echo "Do some stuff like:"
     echo "source .venv/bin/activate"
     echo "exec python3 src/main.py"
