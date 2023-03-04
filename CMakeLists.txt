@@ -165,6 +165,7 @@ catkin_install_python(PROGRAMS
    src/ros/realsense_image.py
    src/ros/test.py
    src/ros/image_processing.py
+   src/ros/object_detection_model.py
    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
