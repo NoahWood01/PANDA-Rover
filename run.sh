@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e -u -o pipefail
-
 # This will be the single start script to begin everything.
 # Assumption here is that everything must autonomously start on power up
 # We will set this to run on boot
@@ -13,18 +11,11 @@ set -e -u -o pipefail
 # run code
 
 
-if [[ $# -eq 0 ]] || [[ $1 == "help" ]] ; then
-    echo "Run Tests ./run.sh test"
-    echo "Run Startup ./run.sh start"
-    exit 0
-fi
+function startUpLaunches () {
+    source /home/panda/.bashrc
+    source /opt/ros/melodic/setup.bash
+    source /home/panda/catkin_ws/devel/setup.bash
 
-name=$1
-if [[ $name == "test" ]]; then
-    echo "Running test.py"
-    source .venv/bin/activate
-    exec python3 src/test.py
-elif [[ $name == "start" ]]; then
     # Start stuff goes here
     echo "Startup initiated"
 
@@ -33,10 +24,57 @@ elif [[ $name == "start" ]]; then
     echo "roscore up"
     sleep 5
     roslaunch realsense2_camera rs_camera.launch &>/dev/null &
+    sleep 3
     echo "realsense ros node launched"
-    sleep 1
 
-    echo "Do some stuff like:"
-    echo "source .venv/bin/activate"
-    echo "exec python3 src/main.py"
+    sleep 1
+    echo "launcing panda nodes"
+    roslaunch panda_rover panda.launch &>/dev/null &
+    sleep 5
+    echo "Init Lidar"
+    roslaunch rplidar_ros rplidar.launch &>/dev/null &
+    sleep 3
+
+    roslaunch box_detection rplidar_boxes.launch &>/dev/null &
+    echo "Init Motors"
+    roslaunch dynamixel_sdk_examples motors.launch &>/dev/null &
+    sleep 3
+     echo "Launching Done"
+
+    echo "Init upward camera"
+    roslaunch jetbot_ros upwardcam.launch &>/dev/null &
+    sleep 3
+    echo "Upward camera launched"
+
+    echo "Init QR code reader"
+    roslaunch zbar_ros qr_reader.launch &>/dev/null &
+    sleep 3
+    echo "QR code reader launched"
+
+    # for QR code to work properly, "rostopic echo /barcode" should be ran.
+
+
+
+}
+
+
+if [[ $# -eq 0 ]] || [[ $1 == "help" ]] ; then
+    echo "Run Tests ./run.sh test"
+    echo "Run Startup ./run.sh start"
+    echo "running startup"
+
+    startUpLaunches
+
+    exit 0
+fi
+
+name=$1
+if [[ $name == "test" ]]; then
+    echo "Running test.py"
+    source .venv/bin/activate
+    # exec python3 src/test.py
+    exec roslaunch rplidar_ros rplidar.launch
+    exec rosrun dynamixel_sdk_examples read_write_node.py
+elif [[ $name == "start" ]]; then
+    startUpLaunches
 fi

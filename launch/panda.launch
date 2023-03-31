@@ -1,0 +1,4 @@
+<launch>
+  <node name="image_reader" pkg="panda_rover" type="realsense_image.py" output="screen"/>
+  <node name="detection_model" pkg="panda_rover" type="object_detection_model.py" output="screen"/>
+</launch>
