@@ -20,7 +20,7 @@ import numpy as np
 import sys
 import os
 import math
-
+from enum import Enum
 
 ROSPY_RATE = 1
 
@@ -32,12 +32,48 @@ DEPTH_IMAGE_TOPIC = "/camera/depth/image_rect_raw"
 # **** ALL UNITS EXPRESSED IN MM
 OPENING_WIDTH = 381.0
 
+
+
+# Subscriber for the QR code
+def qr_callback(self,data)
+    try:
+        rospy.loginfo(rospy.get_caller_id() + "QR: %s", data.data)
+    except Exception as e:
+    print(e)
+
+def qr_listener()
+    rospy.init_node("qr_listener", anonymous=True)
+    try:
+        rospy.Subscriber("/barcode", String, qr_callback)
+        rospy.spin()
+    except rospy.ROSInterruptException:
+        pass
+
+
+class RobotMode(Enum):
+    # use lidar to find boxes and prepare to send drone
+    search = "search"
+    # check a found box with drone if it is next box
+    # if correct goto approach else search
+    send_drone = "send_drone"
+    # move to located box
+    approach = "approach"
+    # enter and move through box scanning next qr code
+    enter = "enter"
+    # attempt touch and go
+    touch_and_go = "touch_and_go"
+    # repeat
+
+
 class MasterController:
     def __init__(self):
         self.cv_bridge = CvBridge()
         self.detections_sub = rospy.Subscriber(OBJECT_DETECTION_BOUNDS_TOPIC, detection_bounds, self.data_callback)
         self.depth_image_sub = rospy.Subscriber(DEPTH_IMAGE_TOPIC, msg_Image, self.depth_image_callback)
+
+        self.opening_angle_orientation = None 
         
+
 
     def data_callback(self, data):
         try:
@@ -131,6 +167,14 @@ if __name__ == '__main__':
     rate = rospy.Rate(ROSPY_RATE)
     controller = MasterController()
     print('rover controller started')
+
+    try:
+        qr_listener()
+    except rospy.ROSInterruptException:
+        rospy.logerr("Failed to init QR listener node.")
+
+
     while not rospy.is_shutdown():
         # pub.publish(things)
+        # DO move stuff 
         rate.sleep()

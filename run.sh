@@ -39,22 +39,28 @@ function startUpLaunches () {
     echo "Init Motors"
     roslaunch dynamixel_sdk_examples motors.launch &>/dev/null &
     sleep 3
-     echo "Launching Done"
+    echo "Launching Done"
 
     echo "Init upward camera"
     roslaunch jetbot_ros upwardcam.launch &>/dev/null &
     sleep 3
     echo "Upward camera launched"
 
-    echo "Init QR code reader"
+    echo "Init QR code reader script"
     roslaunch zbar_ros qr_reader.launch &>/dev/null &
     sleep 3
-    echo "QR code reader launched"
+    echo "QR code reader script launched"
 
-    # for QR code to work properly, "rostopic echo /barcode" should be ran.
+    # for QR code to work properly, "rostopic echo /barcode" should be ran.    
+}
 
-
-
+function startUpDocker () {
+    echo "Launching Docker Container and Tello driver"
+    # dont make this a background process
+    # can alternately use:
+    # ./docker_ws/test_container.sh
+    # docker exec tello_container bash -c "source /opt/ros/melodic/setup.bash && source /root/catkin_ws/devel/setup.bash && roslaunch tello_driver tello_node.launch"
+    exec sh ~/docker_ws/test_container.sh
 }
 
 
@@ -64,6 +70,7 @@ if [[ $# -eq 0 ]] || [[ $1 == "help" ]] ; then
     echo "running startup"
 
     startUpLaunches
+    startUpDocker
 
     exit 0
 fi
@@ -76,5 +83,8 @@ if [[ $name == "test" ]]; then
     exec roslaunch rplidar_ros rplidar.launch
     exec rosrun dynamixel_sdk_examples read_write_node.py
 elif [[ $name == "start" ]]; then
+    startUpLaunches
+    startUpDocker
+elif [[ $name == "noDocker" ]]; then
     startUpLaunches
 fi
