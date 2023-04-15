@@ -28,10 +28,10 @@ class TelloCommandDriver():
         self.t1 = threading.Thread(target=self.f)
         self.hover = False
     
-    def f(self):
-        while self.hover:
-            self.fly.stop()
-            sleep(2)
+    # def f(self):
+    #     while self.hover:
+    #         self.fly.down(dist=20)
+    #         sleep(2)
 
 
     def drone_command_callback(self, data):
@@ -43,13 +43,16 @@ class TelloCommandDriver():
             # self.fly 
         elif data.data == "Hover":
             print("Starting hover thread")
+            for i in range(20):
+                self.fly.down(dist=20)
+                sleep(1)
             # self.hover = True
             # while self.hover:
             #     self.fly.flip("forward")
             #     sleep(4)
-            if not self.hover and not self.t1.is_alive():
-                self.hover = True
-                self.t1.start()
+            # if not self.hover and not self.t1.is_alive():
+            #     self.hover = True
+            #     self.t1.start()
         elif data.data == "End Hover":
             print("Ending hover thread")
             self.hover = False

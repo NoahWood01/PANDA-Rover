@@ -162,6 +162,7 @@ class MasterController:
 		try:
 			self.last_rover_qr_read = data.data
 			rospy.loginfo(rospy.get_caller_id() + "QR: %s", data.data)
+			print(rospy.get_caller_id() + "QR: %s", data.data)
 		except Exception as e:
 			print(e)
 

@@ -40,7 +40,7 @@ function startUpLaunches () {
     roslaunch dynamixel_sdk_examples motors.launch &>/dev/null &
     sleep 3
     echo "Launching Done"
-
+	
     echo "Init upward camera"
     roslaunch jetbot_ros upwardcam.launch &>/dev/null &
     sleep 3

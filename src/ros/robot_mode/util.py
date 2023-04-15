@@ -244,15 +244,14 @@ def check_orientation_inside_box(controller):
             break
 
     change_in_right_from_index_middle = abs((len(controller.front_lidar_scan) / 2) - right_edge_index)
-    change_in_left_from_index_middle = abs((len(controller.front_lidar_scan) / 2) - left_edge_index)
-    turnClockwise = False
-    turnClockwise = change_in_left_from_index_middle > change_in_right_from_index_middle
+    change_in_left_from_index_middle = abs(left_edge_index - (len(controller.front_lidar_scan) / 2))
+
     left_right_index_difference = float(0)
-    left_right_index_difference = change_in_left_from_index_middle + change_in_right_from_index_middle
+    left_right_index_difference = change_in_left_from_index_middle - change_in_right_from_index_middle
     print("left_right_index_difference: ", left_right_index_difference, "left_edge_index", left_edge_index, "right_edge_index", right_edge_index)
     left_right_angle_difference = ((left_right_index_difference / 2) * 180) / len(controller.front_lidar_scan)
     print("left_right angle: ", left_right_angle_difference)
-    return left_right_angle_difference, left_right_difference, turnClockwise
+    return left_right_angle_difference, left_right_difference
 
 
 def make_opening_aligned(controller):
@@ -294,15 +293,16 @@ def move_through_box(controller):
     while check_if_outside_box(controller):
         controller.movement_calculator.move_forward(speed_percentage=0.2,time_in_ms=0.1)
 
+    while check_if_outside_box(controller):
+        controller.movement_calculator.move_forward(speed_percentage=0.2,time_in_ms=0.1)
+
     while not check_if_outside_box(controller):
         controller.movement_calculator.move_forward(speed_percentage=0.3,time_in_ms=ITERATION_TIME)
-        inside_box_angle, inside_box_left_right_distance, turnClockwise = check_orientation_inside_box(controller)
-        print("target angle rotation: ", inside_box_angle,"left_right_difference: ", inside_box_left_right_distance, "turnClockwise", turnClockwise)
-        # if abs(inside_box_angle) > 3:
-        #     if inside_box_angle > 0:
-        #         controller.movement_calculator.rotate_counterclockwise(abs(inside_box_angle))
-        #     if inside_box_angle < 0:
-        #         controller.movement_calculator.rotate_clockwise(abs(inside_box_angle))
+        inside_box_angle, inside_box_left_right_distance = check_orientation_inside_box(controller)
+        if inside_box_angle > 0:
+            controller.movement_calculator.rotate_counterclockwise(abs(inside_box_angle) / 2)
+        if inside_box_angle < 0:
+            controller.movement_calculator.rotate_clockwise(abs(inside_box_angle) / 2)
         if inside_box_left_right_distance < -50 and inside_box_left_right_distance > -1000:
             controller.movement_calculator.move_right(speed_percentage=0.2,time_in_ms=ITERATION_TIME)
         if inside_box_left_right_distance > 50 and inside_box_left_right_distance < 1000:
