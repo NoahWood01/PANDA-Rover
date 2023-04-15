@@ -11,22 +11,27 @@ under catkin_install_python(PROGRAMS ...
 
 import rospy
 from std_msgs.msg import String
-from fly_tello import FlyTello
+# from fly_tello import FlyTello
 from time import sleep
-import threading
+# import threading
+
+import asyncio
+from tello_asyncio import Tello, Vector
 
 ROSPY_RATE = 1
 
 class TelloCommandDriver():
     def __init__(self):
+        print("tello command driver init")
         drone_commands_topic = '/drone_commands'
-        self.my_tellos = list()
-        self.my_tellos.append('0TQZK5DED02JWM')
-        self.fly = FlyTello(self.my_tellos, get_status=True)
+        # self.my_tellos = list()
+        # self.my_tellos.append('0TQZK5DED02JWM')
+        # self.fly = FlyTello(self.my_tellos, get_status=True)
+        self.drone = Tello()
         self.sub = rospy.Subscriber(drone_commands_topic, String, self.drone_command_callback)
         print("callback check")
-        self.t1 = threading.Thread(target=self.f)
-        self.hover = False
+        # self.t1 = threading.Thread(target=self.f)
+        # self.hover = False
     
     # def f(self):
     #     while self.hover:
@@ -59,11 +64,16 @@ class TelloCommandDriver():
             self.t1.join()
             print("Hover thread done")
         elif data.data == "Takeoff":
-            first_yaw = self.fly.get_status("yaw", tello=1, sync=True) # only record this the very first takeoff
-            print("first yaw: " + first_yaw)
-            self.fly.takeoff()
-            self.fly.up(dist=20)
-            self.fly.forward(dist=30)   
+            print("published takeoff")
+            # first_yaw = self.fly.get_status("yaw", tello=1, sync=True) # only record this the very first takeoff
+            # print("first yaw: " + first_yaw)
+            # self.fly.takeoff()
+            # self.fly.up(dist=20)
+            # self.fly.forward(dist=30)   
+            await self.drone.wifi_wait_for_network(prompt=True)
+            await self.drone.connect()
+            await self.drone.takeoff()
+            await self.drone.land()
         elif data.data == "Backward":
             self.fly.back(dist=80)    
             sleep(5)
@@ -126,7 +136,9 @@ class TelloCommandDriver():
             self.fly.land()
 
 if __name__ == '__main__':
+    print("main test")
     rospy.init_node("drone_commands")
+    print("drone commands node initiated")
     rate = rospy.Rate(ROSPY_RATE)
     tello_command_driver = TelloCommandDriver()
     print('drone commands subscriber listening!')

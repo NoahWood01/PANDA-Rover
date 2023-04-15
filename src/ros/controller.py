@@ -87,8 +87,9 @@ class MasterController:
 			# Stage 1 (Search) Subscription
 
 			#self.drone_qr_reader_sub = rospy.Subscriber(DRONE_QR_READER_SUB, String, self.drone_qr_reader_callback)
-		
+		print("test")
 		self.drone_command_pub = rospy.Publisher(DRONE_COMMANDS_TOPIC, String, queue_size=1000)
+		print("published drone commands topic")
 
 		# TODO: Add IMU topics
 		# self.drone_imu_status = 0
