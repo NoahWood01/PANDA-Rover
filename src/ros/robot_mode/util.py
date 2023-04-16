@@ -87,31 +87,32 @@ def get_angle_offset_of_closest_box(controller):
     print(theta)
     return theta
 
-def check_if_aligned_with_opening(controller):
-    # Checking left edge
-    left = float(0)
-    right = float(0)
-    for index, distances in enumerate(controller.front_lidar_scan):
-        if distances < 500:
-            left = distances
-            break
+# DEPRICATED
+# def check_if_aligned_with_opening(controller):
+#     # Checking left edge
+#     left = float(0)
+#     right = float(0)
+#     for index, distances in enumerate(controller.front_lidar_scan):
+#         if distances < 500:
+#             left = distances
+#             break
 
-    for index, distances in enumerate(controller.front_lidar_scan[::-1]):
-        if distances < 500:
-            right = distances
-            break
+#     for index, distances in enumerate(controller.front_lidar_scan[::-1]):
+#         if distances < 500:
+#             right = distances
+#             break
 
-    left_offset = (len(controller.front_lidar_scan) / 2) - left
-    right_offset = right - (len(controller.front_lidar_scan) / 2)
+#     left_offset = (len(controller.front_lidar_scan) / 2) - left
+#     right_offset = right - (len(controller.front_lidar_scan) / 2)
 
-    print('left, right')
-    print(left, right, abs(left - right))
-    # print(right_offset)
-    # if left_offset <= abs(right_offset) + ANGLE_OFFSET_WINDOW and left_offset >= abs(right_offset) - ANGLE_OFFSET_WINDOW and controller.front_lidar_scan[ len(controller.front_lidar_scan) / 2] > 1500:
-    #     return True
-    if abs(left - right) < DISTANCE_BOX_DETECTION_WINDOW and controller.front_lidar_scan[ len(controller.front_lidar_scan) / 2] > 1500:
-        return True
-    return False
+#     print('left, right')
+#     print(left, right, abs(left - right))
+#     # print(right_offset)
+#     # if left_offset <= abs(right_offset) + ANGLE_OFFSET_WINDOW and left_offset >= abs(right_offset) - ANGLE_OFFSET_WINDOW and controller.front_lidar_scan[ len(controller.front_lidar_scan) / 2] > 1500:
+#     #     return True
+#     if abs(left - right) < DISTANCE_BOX_DETECTION_WINDOW and controller.front_lidar_scan[ len(controller.front_lidar_scan) / 2] > 1500:
+#         return True
+#     return False
     
 def check_if_aligned_with_opening_in_cone(controller):
     index_cone_window = 20

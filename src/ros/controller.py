@@ -98,13 +98,10 @@ class MasterController:
 		self.mode = RobotMode('search')
 
 		if not no_drone:
-			# Init Drone
-			self.drone = tellopy.Tello()
-			self.drone.connect()
-
+			pass
 			# Stage 1 (Search) Subscription
-			
-			self.drone_qr_reader_sub = rospy.Subscriber(DRONE_QR_READER_SUB, String, self.drone_qr_reader_callback)
+
+			#self.drone_qr_reader_sub = rospy.Subscriber(DRONE_QR_READER_SUB, String, self.drone_qr_reader_callback)
 		
 		self.drone_command_pub = rospy.Publisher(DRONE_COMMANDS_TOPIC, String, queue_size=1000)
 

@@ -23,24 +23,19 @@ def approach(controller):
 	# print("Align with opening")
 	# make_opening_aligned(controller)
 	print("Aligned, sending drone")
-	exit_code = call("python3 ./tello_takeoff.py", shell=True)
-	controller.drone_command_pub.publish("Land")
+	# exit_code = call("python3 ./tello_takeoff.py", shell=True)
+	sleep(5)
+	controller.drone_command_pub.publish("Takeoff")
 
-	# hover = False
-	# def f(): 
-	# 	while hover:
-	# 		exit_code = call("python3 ./tello_hover.py", shell=True)
-	# 		sleep(2)
-	# t1 = threading.Thread(target=f)
+	sleep(18)
 
-	# print("Starting hover thread")
-	# hover = True
-	# t1.start()
+	controller.drone_command_pub.publish("Hover")
 
-	# sleep(5) # Here we would want to set hover = False when decision is made based on barcode_drone
-	# hover = False
-	# t1.join()
-	# print("Hover thread done")
+	sleep(5) # Here we would want to set hover = False when decision is made based on barcode_drone
+
+	controller.drone_command_pub.publish("End Hover")
+
+	sleep(1)
 
 	# This is the case where correct box is found, so drone moves forward and lands
 	# print("Correct box found, drone forward")
@@ -48,7 +43,7 @@ def approach(controller):
 
 	# This is the case where incorrect box is found, so drone moves backward and lands
 	print("Incorrect box found, drone backward")
-	exit_code = call("python3 ./tello_backward_land.py", shell=True)
+	controller.drone_command_pub.publish("Backward")
 
 	# Here we decide whether to recall drone or move through based on barcode_drone topic
 	#print("Move through box")

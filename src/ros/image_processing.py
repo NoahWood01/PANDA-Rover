@@ -27,8 +27,8 @@ class ImageDataListener:
     def data_callback(self, data):
         try:
             cv_image = self.reshape_image(data)
-            sys.stdout.write("%s Image shape: %s \r" % (self.topic, str(cv_image.shape)))
-            sys.stdout.flush()
+            # sys.stdout.write("%s Image shape: %s \r" % (self.topic, str(cv_image.shape)))
+            # sys.stdout.flush()
         except Exception as e:
             print(e)
             return

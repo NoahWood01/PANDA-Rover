@@ -37,8 +37,8 @@ class ImageListener:
             # where 3 is RGB
             cv_image = self.bridge.imgmsg_to_cv2(data, data.encoding)
             pix = (data.width/2, data.height/2)
-            sys.stdout.write('%s: cv image data at center(%d, %d): %s\r' % (self.topic, pix[0], pix[1], np.array_str(cv_image[pix[1], pix[0]])))
-            sys.stdout.flush()
+            # sys.stdout.write('%s: cv image data at center(%d, %d): %s\r' % (self.topic, pix[0], pix[1], np.array_str(cv_image[pix[1], pix[0]])))
+            # sys.stdout.flush()
             # cv_image = cv_image.flatten()
             cv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB).flatten()
             self.cv_image = cv_image.astype(np.float32)
