@@ -55,6 +55,10 @@ if __name__ == '__main__':
     print('realsense subscriber listening!')
     print('image_data publishing!')
     while not rospy.is_shutdown():
-        pub.publish(listener.cv_image)
+        try:
+            if listener.cv_image:
+                pub.publish(listener.cv_image)
+        except Exception as e:
+            pass
         rate.sleep()
         

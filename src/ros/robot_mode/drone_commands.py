@@ -27,28 +27,29 @@ class TelloCommandDriver():
         print("callback check")
         self.t1 = threading.Thread(target=self.f)
         self.hover = False
-        #self.is_command_in_progress = False
     
     def f(self):
         while self.hover:
-            self.fly.up(dist=0)
-            sleep(1)
+            self.fly.stop()
+            sleep(2)
 
 
     def drone_command_callback(self, data):
         print(data)
-        # if self.is_command_in_progress:
-        #     return
-        # else:
-        #     self.is_command_in_progress = True
+
         if data.data == "Land":
             print("land")
             pass
             # self.fly 
         elif data.data == "Hover":
             print("Starting hover thread")
-            self.hover = True
-            self.t1.start()
+            # self.hover = True
+            # while self.hover:
+            #     self.fly.flip("forward")
+            #     sleep(4)
+            if not self.hover and not self.t1.is_alive():
+                self.hover = True
+                self.t1.start()
         elif data.data == "End Hover":
             print("Ending hover thread")
             self.hover = False
@@ -59,8 +60,7 @@ class TelloCommandDriver():
             print("first yaw: " + first_yaw)
             self.fly.takeoff()
             self.fly.up(dist=20)
-            self.fly.forward(dist=40)   
-            #self.is_command_in_progress = False
+            self.fly.forward(dist=30)   
         elif data.data == "Backward":
             self.fly.back(dist=80)    
             sleep(5)
@@ -88,7 +88,39 @@ class TelloCommandDriver():
             #     time.sleep(2)   
 
             self.fly.land() 
-            self.is_command_in_progress = False
+        elif data.data == "Forward":
+            self.fly.up(dist=30) 
+            self.fly.forward(dist=30)   
+
+            sleep(3)
+            self.fly.straight_from_pad(x=0, y=0, z=50, speed=100, pad='m4')
+            sleep(4)
+            self.fly.straight_from_pad(x=0, y=0, z=50, speed=100, pad='m4')
+            sleep(4)
+            self.fly.straight_from_pad(x=0, y=0, z=25, speed=100, pad='m4') #x = 5 for going back, x = 0 for going forward
+            sleep(4)
+
+            self.fly.straight_from_pad(x=-8, y=0, z=25, speed=100, pad='m4')
+            sleep(4)       
+            self.fly.straight_from_pad(x=-7, y=3, z=25, speed=100, pad='m4')
+            sleep(2)
+            
+            # land_yaw = self.fly.get_status("yaw", tello=1, sync=True)
+            # print("land yaw: " + land_yaw)
+            # diff_yaw = int(land_yaw) - int(tello_takeoff.first_yaw)
+            # if diff_yaw > 0:
+            #     fly.rotate_ccw(angle=diff_yaw, tello=1)
+            #     time.sleep(2)
+            # if diff_yaw < 0: 
+            #     fly.rotate_cw(angle=abs(diff_yaw), tello=1) 
+            #     time.sleep(2)   
+            #fly.set_rc(left_right=0, forward_back=0, up_down=0, yaw=int(fixed_yaw))
+            #time.sleep(1)
+            
+            #fly.straight_from_pad(x=0, y=0, z=25, speed=100, pad='m4')
+        #    #fly.flip(direction='back')
+        ##    fly.reorient(height=25, pad='m4')
+            self.fly.land()
 
 if __name__ == '__main__':
     rospy.init_node("drone_commands")

@@ -29,6 +29,8 @@ my_tellos = list()
 
 from test_movement import MovementCalculator
 from robot_mode.approach_mode import approach
+from robot_mode.search_mode import search
+
 
 ROSPY_RATE = 1
 
@@ -52,23 +54,6 @@ DRONE_ROTATION_SPEED = 5000
 
 
 ROVER_HOME_QR_CODE = "PANDA"
-
-
-# Subscriber for the QR code
-def qr_callback(self,data):
-	try:
-		rospy.loginfo(rospy.get_caller_id() + "QR: %s", data.data)
-	except Exception as e:
-		print(e)
-
-def qr_listener():
-	rospy.init_node("qr_listener", anonymous=True)
-	try:
-		rospy.Subscriber("/barcode", String, qr_callback)
-		rospy.spin()
-	except rospy.ROSInterruptException:
-		pass
-
 
 
 class RobotMode(Enum):
@@ -109,15 +94,7 @@ class MasterController:
 		# self.drone_imu_status = 0
 		# self.rover_imu_status = 0
 
-		# Stage 1 Variables
-		self.drone_qr_code = ""
-		self.next_box_id = ""
-
-		# Maintaining box order
-		self.current_box = ""
-		self.previous_boxes = []
-		# self.next_box_id_pub = rospy.Publisher(NEXT_BOX_ID_TOPIC, String, queue_size=1000)
-		# self.correct_box_sub = rospy.Subscrbier(CORRECT_BOX_TOPIC, String, self.correct_box_callback)
+		
 
 		self.lidar_boxes = []
 		self.front_lidar_scan = []
@@ -125,7 +102,8 @@ class MasterController:
 		self.detections_sub = rospy.Subscriber(OBJECT_DETECTION_BOUNDS_TOPIC, detection_bounds, self.data_callback)
 		self.depth_image_sub = rospy.Subscriber(DEPTH_IMAGE_TOPIC, msg_Image, self.depth_image_callback)
 		
-
+		self.qr_listener()
+		
 
 		self.opening_angle_orientation = None 
 		self.curr_depth_image = None
@@ -134,6 +112,20 @@ class MasterController:
 
 		self.lidar_box_angles_sub = rospy.Subscriber(LIDAR_BOX_ANGLES_TOPIC, lidar_msgs, self.lidar_box_angles_callback)
 		self.lidar_scan_sub = rospy.Subscriber(LIDAR_SCAN_TOPIC, Floats, self.lidar_scan_callback)
+
+
+		# Course variables
+
+		# Stage 1 Variables
+		self.drone_qr_code = ""
+		self.last_rover_qr_read = ""
+		self.next_box_id = ""
+
+		# Maintaining box order
+		self.current_box = ""
+		self.previous_boxes = []
+		# self.next_box_id_pub = rospy.Publisher(NEXT_BOX_ID_TOPIC, String, queue_size=1000)
+		# self.correct_box_sub = rospy.Subscrbier(CORRECT_BOX_TOPIC, String, self.correct_box_callback)
 
 
 
@@ -152,7 +144,7 @@ class MasterController:
 		# 	for box in boxes:
 		# 		self.mode = RobotMode('send_drone')
 		# 		if self.send_drone_to_box(box) == True:
-		self.mode = RobotMode('approach')
+		# self.mode = RobotMode('approach')
 		# 			return
 		# 	self.mode = RobotMode('fucked')
 
@@ -164,6 +156,22 @@ class MasterController:
 
 	def drone_qr_reader_callback(self, id):
 		self.drone_qr_code = id
+
+	# Subscriber for the QR code
+	def qr_callback(self, data):
+		try:
+			self.last_rover_qr_read = data.data
+			rospy.loginfo(rospy.get_caller_id() + "QR: %s", data.data)
+		except Exception as e:
+			print(e)
+
+	def qr_listener(self):
+		#rospy.init_node("qr_listener", anonymous=True)
+		try:
+			self.rover_qr_code_sub = rospy.Subscriber("/barcode", String, self.qr_callback)
+		except rospy.ROSInterruptException:
+			pass
+
 
 	def data_callback(self, data):
 		try:
@@ -187,7 +195,7 @@ class MasterController:
 				x_max, y_max = opening_to_move_to.x_max, opening_to_move_to.y_max
 				#print("opening chosen: ", x_min, y_min, x_max, y_max)
 				depths = self.get_depths_for_bounding_box(x_min, y_min, x_max, y_max)
-				print(depths)
+				#print(depths)
 				opening_angle_orientation = self.get_opening_orientation(depths)
 				if type(opening_angle_orientation) == float:
 					self.opening_angle_orientation = opening_angle_orientation
@@ -330,31 +338,25 @@ if __name__ == '__main__':
 	controller = MasterController(no_drone=no_drone)
 	print('rover controller started')
 
-	try:
-		pass
-		# TODO move this outside of controller.py 
-		# cant init 2 nodes in same file
-		#qr_listener()
-	except rospy.ROSInterruptException:
-		rospy.logerr("Failed to init QR listener node.")
-
 
 	# Wait for movement topics to initalize
 	# while True:
 	# 	if controller.movement_calculator.pub.get_num_connections() > 0:
 	# 		break
 
-	#controller.movement_calculator.move_forward()
-	#controller.movement_calculator.rotate_counterclockwise(90)
-
-	print("test")
-	# reset	
+	# TODO REMOVE THIS WHEN DONE TESTING
 	controller.mode = RobotMode.approach
+
 	while not rospy.is_shutdown() and controller.mode != RobotMode.done:
-		print("Looped")
-		# pub.publish(things)
-		# DO move stuff 
+		print("Looped", controller.mode)
+
+		if controller.mode == RobotMode.search:
+			search(controller)
+			controller.mode = RobotMode.approach
+
 		if controller.mode == RobotMode.approach:
 			approach(controller)
+			# TODO REMOVE THIS WHEN DONE TESTING
 			break
+
 		rate.sleep()
