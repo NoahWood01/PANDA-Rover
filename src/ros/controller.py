@@ -273,7 +273,7 @@ class MasterController:
 		denominator = -2 * OPENING_WIDTH * d2
 		# print(d1,d2,numerator,denominator , numerator/denominator)
 		angle = math.asin( numerator / denominator )
-		print("angle %s" % angle)
+		# print("angle %s" % angle)
 		return angle
 
 
