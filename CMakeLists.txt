@@ -175,6 +175,7 @@ catkin_install_python(PROGRAMS
    src/ros/object_detection_model.py
    src/ros/controller.py
    src/ros/test_movement.py
+   src/ros/drone_commands.py
    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

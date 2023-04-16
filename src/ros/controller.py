@@ -38,6 +38,7 @@ OBJECT_DETECTION_BOUNDS_TOPIC = "/object_detection_bounds"
 DEPTH_IMAGE_TOPIC = "/camera/depth/image_rect_raw"
 LIDAR_BOX_ANGLES_TOPIC = "/get_angles"
 DRONE_QR_READER_SUB = "zbar/barcode_drone"
+DRONE_COMMANDS_TOPIC = '/drone_commands'
 LIDAR_SCAN_TOPIC = '/front_lidar_scan'
 
 # **** ALL UNITS EXPRESSED IN MM
@@ -104,6 +105,8 @@ class MasterController:
 			# Stage 1 (Search) Subscription
 			
 			self.drone_qr_reader_sub = rospy.Subscriber(DRONE_QR_READER_SUB, String, self.drone_qr_reader_callback)
+		
+		self.drone_command_pub = rospy.Publisher(DRONE_COMMANDS_TOPIC, String, queue_size=1000)
 
 		# TODO: Add IMU topics
 		# self.drone_imu_status = 0
@@ -124,6 +127,8 @@ class MasterController:
 
 		self.detections_sub = rospy.Subscriber(OBJECT_DETECTION_BOUNDS_TOPIC, detection_bounds, self.data_callback)
 		self.depth_image_sub = rospy.Subscriber(DEPTH_IMAGE_TOPIC, msg_Image, self.depth_image_callback)
+		
+
 
 		self.opening_angle_orientation = None 
 		self.curr_depth_image = None
@@ -345,7 +350,7 @@ if __name__ == '__main__':
 	#controller.movement_calculator.move_forward()
 	#controller.movement_calculator.rotate_counterclockwise(90)
 
-
+	print("test")
 	# reset	
 	controller.mode = RobotMode.approach
 	while not rospy.is_shutdown() and controller.mode != RobotMode.done:

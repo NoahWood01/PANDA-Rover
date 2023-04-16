@@ -1,3 +1,5 @@
+from subprocess import call
+
 # from util import align_orientation_to_box, make_opening_aligned
 ANGLE_OFFSET_WINDOW = 20 # in Index not DEGREES 1 index = 0.3 degreesish
 ITERATION_TIME = 0.1
@@ -271,6 +273,7 @@ def make_opening_aligned(controller):
         if min_scan > 300:
             controller.movement_calculator.move_forward(speed_percentage=0.2,time_in_ms=ITERATION_TIME)
 
+def move_through_box(controller):
     print('moving forward')
     while check_if_outside_box(controller):
         controller.movement_calculator.move_forward(speed_percentage=0.2,time_in_ms=0.1)
@@ -290,6 +293,4 @@ def make_opening_aligned(controller):
             controller.movement_calculator.move_left(speed_percentage=0.2,time_in_ms=ITERATION_TIME)
 
     controller.movement_calculator.move_forward(speed_percentage=0.5,time_in_ms=1)
-    print('Found')
-        # move Left
 
