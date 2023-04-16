@@ -50,8 +50,14 @@ function startUpLaunches () {
     roslaunch zbar_ros qr_reader.launch &>/dev/null &
     sleep 3
     echo "QR code reader script launched"
+    # This is pubbed in the Controller.py script
 
-    # for QR code to work properly, "rostopic echo /barcode" should be ran.    
+    echo "Init IMU script"
+    roslaunch imu_bno055 imu.launch &>/dev/null &
+    sleep 3
+    echo "IMU has launched"
+    # data is output in topic "/imu/data", I will add this to controller  - jules
+    
 }
 
 function startUpDocker () {

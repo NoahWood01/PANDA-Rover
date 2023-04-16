@@ -111,7 +111,7 @@ class ObjectDetectionListener:
                     msg.y_max = ymax
                     detections.append(msg)
 
-            # cv2.imwrite("../catkin_ws/src/PANDA-Rover/model_detect_res.png", cv_image)
+            #cv2.imwrite("../catkin_ws/src/PANDA-Rover/model_detect_res.png", cv_image)
             # self.cv_image = self.cv_bridge.cv2_to_imgmsg(cv_image, "passthrough")
             # sys.stdout.write(f"{len(detections)} were detected\n")
             # sys.stdout.write(f"{detections} were detected\n")

@@ -54,6 +54,8 @@ add_message_files(
   FILES
   detection_bound.msg
   detection_bounds.msg
+  lidar_msg.msg
+  lidar_msgs.msg
 #   Message1.msg
 #   Message2.msg
 )
@@ -172,6 +174,7 @@ catkin_install_python(PROGRAMS
    src/ros/image_processing.py
    src/ros/object_detection_model.py
    src/ros/controller.py
+   src/ros/test_movement.py
    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
