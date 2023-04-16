@@ -104,8 +104,44 @@ def check_if_aligned_with_opening(controller):
         return True
     return False
     
+def check_if_aligned_with_opening_in_cone(controller):
+    index_cone_window = 20
+
+    if controller.front_lidar_scan[(len(controller.front_lidar_scan) / 2)] > 900:
+        return False
+
+    # Checking left edge
+    left_index = float(0)
+    right_index = float(0)
+    scans = list(controller.front_lidar_scan)
+
+    for index, distances in enumerate(scans):
+        if distances < 500:
+            left_index = index
+            break
+
+    for index in range(len(scans) -1, 0, -1):
+        if scans[index] < 500:
+            right_index = index
+            break
+
+    print("left_index: ", str(left_index) "right_index: ", str(right_index))
+    print("mid distance", str(controller.front_lidar_scan[(len(controller.front_lidar_scan) / 2)]) "left vision distance: ", str(controller.front_lidar_scan[(len(controller.front_lidar_scan) / 2) + index_cone_window]), "right vision distance: ", str(controller.front_lidar_scan[(len(controller.front_lidar_scan) / 2) - index_cone_window]))
+    if (
+        
+        left_index < (len(controller.front_lidar_scan) / 2) + index_cone_window and
+        right_index > (len(controller.front_lidar_scan) / 2) - index_cone_window and
+        controller.front_lidar_scan[(len(controller.front_lidar_scan) / 2) + index_cone_window] > 500 and
+        controller.front_lidar_scan[(len(controller.front_lidar_scan) / 2) - index_cone_window] > 500
+    ):
+        return True
+    print("found")
+    return False
+
 def make_opening_aligned(controller):
-    while not check_is_opening_found(controller):
+    while not check_if_aligned_with_opening_in_cone(controller):
+
+        """
         controller.movement_calculator.move_left(speed_percentage=0.1,time_in_ms=ITERATION_TIME)
         box_angle_offset = get_angle_offset_of_closest_box(controller)
         if box_angle_offset > 5:
@@ -117,7 +153,7 @@ def make_opening_aligned(controller):
             controller.movement_calculator.move_backward(speed_percentage=0.2,time_in_ms=ITERATION_TIME)
         if min_scan > 300:
             controller.movement_calculator.move_forward(speed_percentage=0.2,time_in_ms=ITERATION_TIME)
-    
+        """
     """
     print('Detected some opening')
     while not check_if_aligned_with_opening(controller):
