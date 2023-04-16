@@ -107,7 +107,8 @@ def check_if_aligned_with_opening(controller):
 def check_if_aligned_with_opening_in_cone(controller):
     index_cone_window = 20
 
-    if controller.front_lidar_scan[(len(controller.front_lidar_scan) / 2)] > 900:
+    if controller.front_lidar_scan[(len(controller.front_lidar_scan) / 2)] < 900:
+        print("No entrance")
         return False
 
     # Checking left edge
@@ -117,25 +118,25 @@ def check_if_aligned_with_opening_in_cone(controller):
 
     for index, distances in enumerate(scans):
         if distances < 500:
-            left_index = index
+            right_index = index
             break
 
     for index in range(len(scans) -1, 0, -1):
         if scans[index] < 500:
-            right_index = index
+            left_index = index
             break
 
-    print("left_index: ", str(left_index) "right_index: ", str(right_index))
-    print("mid distance", str(controller.front_lidar_scan[(len(controller.front_lidar_scan) / 2)]) "left vision distance: ", str(controller.front_lidar_scan[(len(controller.front_lidar_scan) / 2) + index_cone_window]), "right vision distance: ", str(controller.front_lidar_scan[(len(controller.front_lidar_scan) / 2) - index_cone_window]))
+    print("left_index: ", str(left_index), "right_index: ", str(right_index))
+    print("mid distance", str(controller.front_lidar_scan[(len(controller.front_lidar_scan) / 2)]), "left vision distance: ", str(controller.front_lidar_scan[(len(controller.front_lidar_scan) / 2) + index_cone_window]), "right vision distance: ", str(controller.front_lidar_scan[(len(controller.front_lidar_scan) / 2) - index_cone_window]))
     if (
         
-        left_index < (len(controller.front_lidar_scan) / 2) + index_cone_window and
-        right_index > (len(controller.front_lidar_scan) / 2) - index_cone_window and
+        left_index > (len(controller.front_lidar_scan) / 2) and
+        right_index < (len(controller.front_lidar_scan) / 2) and
         controller.front_lidar_scan[(len(controller.front_lidar_scan) / 2) + index_cone_window] > 500 and
         controller.front_lidar_scan[(len(controller.front_lidar_scan) / 2) - index_cone_window] > 500
     ):
-        return True
-    print("found")
+        print("found")
+        return True 
     return False
 
 def make_opening_aligned(controller):

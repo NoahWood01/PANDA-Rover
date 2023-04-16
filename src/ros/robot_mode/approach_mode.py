@@ -14,7 +14,7 @@ def approach(controller):
 	"""
 	print("Locating")
 	while len(controller.lidar_boxes) == 0: 
-		sleep(`1)`
+		sleep(1)
 	# while True:
 	# 	print(str(controller.front_lidar_scan[0]), str(controller.front_lidar_scan[-1]))
 
