@@ -26,18 +26,25 @@ def get_orientation_to_box_filtered(controller):
     threshold = 500
     
     # filtered_scans = filter(lambda x: x < threshold, controller.front_lidar_scan)
-    for index, distances in enumerate(controller.front_lidar_scan):
+    # Checking left edge
+    left_angle = float(0)
+    right_angle = float(0)
+    scans = list(controller.front_lidar_scan)
+
+    for index, distances in enumerate(scans):
         if distances < threshold:
-            left_angle = (index * 180) / len(controller.front_lidar_scan)
+            right_angle = (180 * index) / len(controller.front_lidar_scan)
             break
 
-    for index, distances in enumerate(controller.front_lidar_scan[::-1]):
-        if distances < threshold:
-            right_angle = (index * 180) / len(controller.front_lidar_scan)
+    for index in range(len(scans) -1, 0, -1):
+        if scans[index] < threshold:
+            left_angle = (180 * index) / len(controller.front_lidar_scan)
             break
+
+    
     print("left_angle, right_angle", str(left_angle), str(right_angle), str((right_angle + left_angle) / 2))
     # print((right_angle + left_angle) / 2)
-    return ((right_angle + left_angle) / 2) + 90, 0
+    return ((right_angle + left_angle) / 2) - 90, 0
     
 
 
@@ -75,8 +82,8 @@ def check_is_opening_found(controller):
 
 def get_angle_offset_of_closest_box(controller):
     theta, distance = get_orientation_to_box_filtered(controller)
-    print("New theta",str(180 - theta))
-    return 180 - theta
+    print(theta)
+    return theta
 
 def check_if_aligned_with_opening(controller):
     # Checking left edge
@@ -108,7 +115,6 @@ def check_if_aligned_with_opening_in_cone(controller):
     index_cone_window = 20
 
     if controller.front_lidar_scan[(len(controller.front_lidar_scan) / 2)] < 900:
-        print("No entrance")
         return False
 
     # Checking left edge
@@ -141,20 +147,19 @@ def check_if_aligned_with_opening_in_cone(controller):
 
 def make_opening_aligned(controller):
     while not check_if_aligned_with_opening_in_cone(controller):
-
-        """
         controller.movement_calculator.move_left(speed_percentage=0.1,time_in_ms=ITERATION_TIME)
         box_angle_offset = get_angle_offset_of_closest_box(controller)
+        print(box_angle_offset)
         if box_angle_offset > 5:
-            controller.movement_calculator.rotate_clockwise(abs(box_angle_offset))
-        if box_angle_offset < 5:
             controller.movement_calculator.rotate_counterclockwise(abs(box_angle_offset))
+        if box_angle_offset < 5:
+            controller.movement_calculator.rotate_clockwise(abs(box_angle_offset))
         reached_distance, min_scan =_scan_iteration(controller)
         if min_scan < 200:
             controller.movement_calculator.move_backward(speed_percentage=0.2,time_in_ms=ITERATION_TIME)
         if min_scan > 300:
             controller.movement_calculator.move_forward(speed_percentage=0.2,time_in_ms=ITERATION_TIME)
-        """
+        
     """
     print('Detected some opening')
     while not check_if_aligned_with_opening(controller):
