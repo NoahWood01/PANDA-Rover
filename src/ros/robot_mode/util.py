@@ -204,6 +204,39 @@ def get_left_right_distance_offset(controller):
             break
     return left_distance - right_distance
 
+
+def check_if_outside_box(controller):
+    '''
+    returns if rover is inside the box
+    '''
+    right_distance = controller.front_lidar_scan[0]
+    left_distance = controller.front_lidar_scan[len(controller.front_lidar_scan) - 1]
+
+    if right_distance > 600 and left_distance > 600:
+        return True
+    return False
+
+def check_orientation_inside_box(controller):
+    right_distance = controller.front_lidar_scan[0]
+    left_distance = controller.front_lidar_scan[len(controller.front_lidar_scan) - 1]
+
+    left_right_difference = left_distance - right_distance
+
+    right_edge_index = float(0)
+    left_edge_index = float(0)
+    for index in range((len(controller.front_lidar_scan) - 1) / 2, 0, -1):
+        if controller.front_lidar_scan[index] < 600:
+            right_edge_index = index
+    
+    for index in range((len(controller.front_lidar_scan) - 1) / 2, (len(controller.front_lidar_scan) - 1), 1):
+        if controller.front_lidar_scan[index] < 600:
+            left_edge_index = index
+
+    left_right_index_difference = left_edge_index - right_edge_index
+    left_right_angle_difference = (left_right_index_difference * 180) / len(controller.front_lidar_scan)
+    return left_right_angle_difference, left_right_difference
+
+
 def make_opening_aligned(controller):
     while not check_if_aligned_with_opening_in_cone(controller):
         controller.movement_calculator.move_left(speed_percentage=0.1,time_in_ms=ITERATION_TIME)
@@ -237,20 +270,25 @@ def make_opening_aligned(controller):
             controller.movement_calculator.move_backward(speed_percentage=0.2,time_in_ms=ITERATION_TIME)
         if min_scan > 300:
             controller.movement_calculator.move_forward(speed_percentage=0.2,time_in_ms=ITERATION_TIME)
-    
-    ANGLE_OFFSET_WINDOW = 10
-    while not check_if_aligned_inside_box(controller):
-        controller.movement_calculator.move_left(speed_percentage=0.1,time_in_ms=ITERATION_TIME)
-        box_angle_offset = get_angle_offset_of_closest_box(controller)
-        if box_angle_offset > 3:
-            controller.movement_calculator.rotate_clockwise(abs(box_angle_offset))
-        if box_angle_offset < 3:
-            controller.movement_calculator.rotate_counterclockwise(abs(box_angle_offset))
-        if min_scan < 200:
-            controller.movement_calculator.move_backward(speed_percentage=0.2,time_in_ms=ITERATION_TIME)
-        if min_scan > 300:
-            controller.movement_calculator.move_forward(speed_percentage=0.2,time_in_ms=ITERATION_TIME)
-    
+
+    print('moving forward')
+    while check_if_outside_box(controller):
+        controller.movement_calculator.move_forward(speed_percentage=0.2,time_in_ms=0.1)
+
+    while not check_if_outside_box(controller):
+        controller.movement_calculator.move_forward(speed_percentage=0.3,time_in_ms=ITERATION_TIME)
+        inside_box_angle, inside_box_left_right_distance = check_orientation_inside_box(controller)
+        if abs(inside_box_angle) > 3:
+            if inside_box_angle > 0:
+                controller.movement_calculator.rotate_clockwise(abs(box_angle_offset))
+            if inside_box_angle < 0:
+                controller.movement_calculator.rotate_counterclockwise(abs(box_angle_offset))
+        if inside_box_left_right_distance < 70:
+            controller.movement_calculator.move_right(speed_percentage=0.2,time_in_ms=ITERATION_TIME)
+        if inside_box_left_right_distance > 70:
+            controller.movement_calculator.move_left(speed_percentage=0.2,time_in_ms=ITERATION_TIME)
+
+    controller.movement_calculator.move_forward(speed_percentage=0.2,time_in_ms=1)
     print('Found')
         # move Left
 
