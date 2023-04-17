@@ -278,11 +278,11 @@ def make_opening_aligned(controller):
     while not check_if_outside_box(controller):
         controller.movement_calculator.move_forward(speed_percentage=0.3,time_in_ms=ITERATION_TIME)
         inside_box_angle, inside_box_left_right_distance = check_orientation_inside_box(controller)
-        if abs(inside_box_angle) > 3:
-            if inside_box_angle > 0:
-                controller.movement_calculator.rotate_clockwise(abs(box_angle_offset))
-            if inside_box_angle < 0:
-                controller.movement_calculator.rotate_counterclockwise(abs(box_angle_offset))
+        # if abs(inside_box_angle) > 3:
+        #     if inside_box_angle > 0:
+        #         controller.movement_calculator.rotate_counterclockwise(abs(box_angle_offset))
+        #     if inside_box_angle < 0:
+        #         controller.movement_calculator.rotate_clockwise(abs(box_angle_offset))
         if inside_box_left_right_distance < 70:
             controller.movement_calculator.move_right(speed_percentage=0.2,time_in_ms=ITERATION_TIME)
         if inside_box_left_right_distance > 70:
