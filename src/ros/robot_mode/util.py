@@ -212,7 +212,7 @@ def check_if_outside_box(controller):
     right_distance = controller.front_lidar_scan[0]
     left_distance = controller.front_lidar_scan[len(controller.front_lidar_scan) - 1]
 
-    if right_distance > 600 and left_distance > 600:
+    if right_distance > 800 and left_distance > 800:
         return True
     return False
 
@@ -278,17 +278,18 @@ def make_opening_aligned(controller):
     while not check_if_outside_box(controller):
         controller.movement_calculator.move_forward(speed_percentage=0.3,time_in_ms=ITERATION_TIME)
         inside_box_angle, inside_box_left_right_distance = check_orientation_inside_box(controller)
+        print(inside_box_angle, inside_box_left_right_distance)
         # if abs(inside_box_angle) > 3:
         #     if inside_box_angle > 0:
         #         controller.movement_calculator.rotate_counterclockwise(abs(box_angle_offset))
         #     if inside_box_angle < 0:
         #         controller.movement_calculator.rotate_clockwise(abs(box_angle_offset))
-        if inside_box_left_right_distance < 70:
+        if inside_box_left_right_distance < -70:
             controller.movement_calculator.move_right(speed_percentage=0.2,time_in_ms=ITERATION_TIME)
         if inside_box_left_right_distance > 70:
             controller.movement_calculator.move_left(speed_percentage=0.2,time_in_ms=ITERATION_TIME)
 
-    controller.movement_calculator.move_forward(speed_percentage=0.2,time_in_ms=1)
+    controller.movement_calculator.move_forward(speed_percentage=0.5,time_in_ms=1)
     print('Found')
         # move Left
 
