@@ -147,7 +147,7 @@ def check_if_aligned_with_opening_in_cone(controller):
 
 def check_final_alignment(controller):
     index_cone_window = 20
-    right_left_error_window = 20
+    right_left_error_window = 25
 
     if controller.front_lidar_scan[(len(controller.front_lidar_scan) / 2)] < 900:
         return False
@@ -185,6 +185,25 @@ def check_final_alignment(controller):
         return True 
     return False
 
+def get_left_right_distance_offset(controller):
+    # Checking left edge
+    left_index = float(0)
+    right_index = float(0)
+    right_distance = float(0)
+    left_distance = float(0)
+    scans = list(controller.front_lidar_scan)
+
+    for index, distance in enumerate(scans):
+        if distance < 500:
+            right_distance = distance
+            break
+
+    for index in range(len(scans) -1, 0, -1):
+        if scans[index] < 500:
+            left_distance = scans[index]
+            break
+    return left_distance - right_distance
+
 def make_opening_aligned(controller):
     while not check_if_aligned_with_opening_in_cone(controller):
         controller.movement_calculator.move_left(speed_percentage=0.1,time_in_ms=ITERATION_TIME)
@@ -200,14 +219,18 @@ def make_opening_aligned(controller):
         if min_scan > 300:
             controller.movement_calculator.move_forward(speed_percentage=0.2,time_in_ms=ITERATION_TIME)
         
-    
+    prev_left_right_offset = float(1)
     while not check_final_alignment(controller):
-        controller.movement_calculator.move_left(speed_percentage=0.1,time_in_ms=ITERATION_TIME)
+        if prev_left_right_offset > 0:
+            controller.movement_calculator.move_left(speed_percentage=0.1,time_in_ms=ITERATION_TIME)
+        else:
+            controller.movement_calculator.move_right(speed_percentage=0.1,time_in_ms=ITERATION_TIME)
+        prev_left_right_offset = get_left_right_distance_offset(controller)
         box_angle_offset = get_angle_offset_of_closest_box(controller)
         print(box_angle_offset)
-        if box_angle_offset > 5:
+        if box_angle_offset > 2:
             controller.movement_calculator.rotate_counterclockwise(abs(box_angle_offset))
-        if box_angle_offset < 5:
+        if box_angle_offset < 2:
             controller.movement_calculator.rotate_clockwise(abs(box_angle_offset))
         reached_distance, min_scan =_scan_iteration(controller)
         if min_scan < 200:
@@ -215,10 +238,8 @@ def make_opening_aligned(controller):
         if min_scan > 300:
             controller.movement_calculator.move_forward(speed_percentage=0.2,time_in_ms=ITERATION_TIME)
     
-    controller.movement_calculator.move_forward(speed_percentage=0.2,time_in_ms=ITERATION_TIME)
-    """
     ANGLE_OFFSET_WINDOW = 10
-    while not check_if_aligned_with_opening(controller):
+    while not check_if_aligned_inside_box(controller):
         controller.movement_calculator.move_left(speed_percentage=0.1,time_in_ms=ITERATION_TIME)
         box_angle_offset = get_angle_offset_of_closest_box(controller)
         if box_angle_offset > 3:
@@ -229,7 +250,6 @@ def make_opening_aligned(controller):
             controller.movement_calculator.move_backward(speed_percentage=0.2,time_in_ms=ITERATION_TIME)
         if min_scan > 300:
             controller.movement_calculator.move_forward(speed_percentage=0.2,time_in_ms=ITERATION_TIME)
-    """
     
     print('Found')
         # move Left
