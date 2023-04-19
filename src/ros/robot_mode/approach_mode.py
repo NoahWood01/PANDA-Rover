@@ -19,13 +19,24 @@ def approach(controller):
 		sleep(1)
 
 	# TODO SEARCH DOES THIS DELETE WHEN DONE TESTING
-	align_orientation_to_box(controller)
+	while True:
+		if align_orientation_to_box(controller):
+			break
+	# 	sleep(1)
+		
+		
 
 
 	print("Approaching")
 	_move_to_box(controller)
 	print("Align with opening")
 	make_opening_aligned(controller)
+
+	# remove this 
+	print("Move through box")
+	move_through_box(controller)
+	return
+
 	print("Aligned, sending drone")
 	sleep(5)
 	controller.drone_command_pub.publish("Takeoff")
@@ -68,7 +79,7 @@ def _move_to_box(controller):
 	"""
 	reached_distance, min_scan = _scan_iteration(controller)
 	while not reached_distance:
-		controller.movement_calculator.move_forward(speed_percentage=0.1,time_in_ms=ITERATION_TIME)
+		controller.movement_calculator.move_forward_cmd_vel(speed_percentage=0.1,time_in_ms=ITERATION_TIME)
 		reached_distance, min_scan = _scan_iteration(controller)
 		print(min_scan)
 

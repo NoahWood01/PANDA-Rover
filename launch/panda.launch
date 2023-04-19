@@ -20,6 +20,6 @@
   <!-- <node name="image_reader" pkg="panda_rover" type="realsense_image.py" output="screen"/> -->
   <!-- <node name="detection_model" pkg="panda_rover" type="object_detection_model.py" output="screen"/> -->
   <node name="controller_node" pkg="panda_rover" type="controller.py" output="screen"/>
-  <node name="drone_command_node" pkg="panda_rover" type="drone_commands.py" output="screen"/>
+  <!-- <node name="drone_command_node" pkg="panda_rover" type="drone_commands.py" output="screen"/> -->
 </launch>
 

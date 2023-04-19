@@ -2,7 +2,7 @@ from subprocess import call
 
 # from util import align_orientation_to_box, make_opening_aligned
 ANGLE_OFFSET_WINDOW = 20 # in Index not DEGREES 1 index = 0.3 degreesish
-ITERATION_TIME = 0.1
+ITERATION_TIME = 0.5
 APPROACH_BOX_DISTANCE = 250
 DISTANCE_BOX_DETECTION_WINDOW = 20
 
@@ -11,6 +11,7 @@ def get_orientation_to_box(controller, use_closest=True):
     return a box theta, box distance
     """
     if len(controller.lidar_boxes) == 0 or not controller.lidar_boxes:
+        print("no boxes found")
         return
     print("Finding closest")
     if not use_closest:
@@ -55,10 +56,11 @@ def align_orientation_to_box(controller, use_closest=True):
     if not theta:
         return False
     rotate_angle = 180 - theta
+    print(rotate_angle)
     if rotate_angle > 0:
-        controller.movement_calculator.rotate_clockwise(abs(rotate_angle))
+        controller.movement_calculator.rotate_clockwise_cmd_vel(abs(rotate_angle))
     else:
-        controller.movement_calculator.rotate_counterclockwise(abs(rotate_angle))
+        controller.movement_calculator.rotate_counterclockwise_cmd_vel(abs(rotate_angle))
     return True
 
     
@@ -219,54 +221,59 @@ def check_orientation_inside_box(controller):
 
 def make_opening_aligned(controller):
     while not check_if_aligned_with_opening_in_cone(controller):
-        controller.movement_calculator.move_left(speed_percentage=0.1,time_in_ms=ITERATION_TIME)
+        controller.movement_calculator.move_left_cmd_vel(speed_percentage=0.1,time_in_ms=1)
         box_angle_offset = get_angle_offset_of_closest_box(controller)
         if box_angle_offset > 5:
-            controller.movement_calculator.rotate_counterclockwise(abs(box_angle_offset))
+            controller.movement_calculator.rotate_counterclockwise_cmd_vel(abs(box_angle_offset))
         if box_angle_offset < 5:
-            controller.movement_calculator.rotate_clockwise(abs(box_angle_offset))
+            controller.movement_calculator.rotate_clockwise_cmd_vel(abs(box_angle_offset))
         reached_distance, min_scan =_scan_iteration(controller)
         if min_scan < 200:
-            controller.movement_calculator.move_backward(speed_percentage=0.2,time_in_ms=ITERATION_TIME)
+            controller.movement_calculator.move_backward_cmd_vel(speed_percentage=0.2,time_in_ms=ITERATION_TIME)
         if min_scan > 300:
-            controller.movement_calculator.move_forward(speed_percentage=0.2,time_in_ms=ITERATION_TIME)
+            controller.movement_calculator.move_forward_cmd_vel(speed_percentage=0.2,time_in_ms=ITERATION_TIME)
         
     prev_left_right_offset = float(1)
     while not check_final_alignment(controller):
         if prev_left_right_offset > 0:
-            controller.movement_calculator.move_left(speed_percentage=0.1,time_in_ms=ITERATION_TIME)
+            controller.movement_calculator.move_left_cmd_vel(speed_percentage=0.1,time_in_ms=ITERATION_TIME)
         else:
-            controller.movement_calculator.move_right(speed_percentage=0.1,time_in_ms=ITERATION_TIME)
+            controller.movement_calculator.move_right_cmd_vel(speed_percentage=0.1,time_in_ms=ITERATION_TIME)
         prev_left_right_offset = get_left_right_distance_offset(controller)
         box_angle_offset = get_angle_offset_of_closest_box(controller)
         if box_angle_offset > 2:
-            controller.movement_calculator.rotate_counterclockwise(abs(box_angle_offset))
+            controller.movement_calculator.rotate_counterclockwise_cmd_vel(abs(box_angle_offset))
         if box_angle_offset < 2:
-            controller.movement_calculator.rotate_clockwise(abs(box_angle_offset))
+            controller.movement_calculator.rotate_clockwise_cmd_vel(abs(box_angle_offset))
         reached_distance, min_scan =_scan_iteration(controller)
         if min_scan < 200:
-            controller.movement_calculator.move_backward(speed_percentage=0.2,time_in_ms=ITERATION_TIME)
+            controller.movement_calculator.move_backward_cmd_vel(speed_percentage=0.2,time_in_ms=ITERATION_TIME)
         if min_scan > 300:
-            controller.movement_calculator.move_forward(speed_percentage=0.2,time_in_ms=ITERATION_TIME)
+            controller.movement_calculator.move_forward_cmd_vel(speed_percentage=0.2,time_in_ms=ITERATION_TIME)
 
 def move_through_box(controller):
+    i = float(0)
     while check_if_outside_box(controller):
-        controller.movement_calculator.move_forward(speed_percentage=0.2,time_in_ms=0.1)
-
-    while check_if_outside_box(controller):
-        controller.movement_calculator.move_forward(speed_percentage=0.2,time_in_ms=0.1)
+        controller.movement_calculator.move_forward_cmd_vel(speed_percentage=0.5,time_in_ms=0.1)
+        if not check_if_outside_box:
+            i = i + 1
+            print(i)
+            if i > 50:
+                
+                break
 
     while not check_if_outside_box(controller):
-        controller.movement_calculator.move_forward(speed_percentage=0.3,time_in_ms=ITERATION_TIME)
+        controller.movement_calculator.move_forward_cmd_vel(speed_percentage=0.3,time_in_ms=ITERATION_TIME)
         inside_box_angle, inside_box_left_right_distance = check_orientation_inside_box(controller)
-        if inside_box_angle > 0:
-            controller.movement_calculator.rotate_counterclockwise(abs(inside_box_angle) / 2)
-        if inside_box_angle < 0:
-            controller.movement_calculator.rotate_clockwise(abs(inside_box_angle) / 2)
+        if abs(inside_box_angle) < 10:
+            if inside_box_angle > 0:
+                controller.movement_calculator.rotate_counterclockwise_cmd_vel(abs(inside_box_angle) / 2)
+            if inside_box_angle < 0:
+                controller.movement_calculator.rotate_clockwise_cmd_vel(abs(inside_box_angle) / 2)
         if inside_box_left_right_distance < -50 and inside_box_left_right_distance > -1000:
-            controller.movement_calculator.move_right(speed_percentage=0.2,time_in_ms=ITERATION_TIME)
+            controller.movement_calculator.move_right_cmd_vel(speed_percentage=0.2,time_in_ms=ITERATION_TIME)
         if inside_box_left_right_distance > 50 and inside_box_left_right_distance < 1000:
-            controller.movement_calculator.move_left(speed_percentage=0.2,time_in_ms=ITERATION_TIME)
+            controller.movement_calculator.move_left_cmd_vel(speed_percentage=0.2,time_in_ms=ITERATION_TIME)
 
-    controller.movement_calculator.move_forward(speed_percentage=0.5,time_in_ms=3)
+    controller.movement_calculator.move_forward_cmd_vel(speed_percentage=0.7,time_in_ms=5)
 
