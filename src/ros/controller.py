@@ -39,7 +39,7 @@ ROSPY_RATE = 1
 OBJECT_DETECTION_BOUNDS_TOPIC = "/object_detection_bounds"
 DEPTH_IMAGE_TOPIC = "/camera/depth/image_rect_raw"
 LIDAR_BOX_ANGLES_TOPIC = "/get_angles"
-DRONE_QR_READER_SUB = "zbar/barcode_drone"
+DRONE_QR_READER_SUB = "/barcode_drone"
 DRONE_COMMANDS_TOPIC = '/drone_commands'
 LIDAR_SCAN_TOPIC = '/front_lidar_scan'
 
@@ -82,13 +82,8 @@ class MasterController:
 		self.cv_bridge = CvBridge()
 		self.mode = RobotMode('search')
 
-		if not no_drone:
-			pass
-			# Stage 1 (Search) Subscription
-
-			#self.drone_qr_reader_sub = rospy.Subscriber(DRONE_QR_READER_SUB, String, self.drone_qr_reader_callback)
-		print("test")
 		self.drone_command_pub = rospy.Publisher(DRONE_COMMANDS_TOPIC, String, queue_size=1000)
+		self.drone_qr_code_sub = rospy.Subscriber(DRONE_QR_READER_SUB, String, self.drone_qr_reader_callback)
 		print("published drone commands topic")
 
 		# TODO: Add IMU topics
@@ -120,10 +115,11 @@ class MasterController:
 		# Stage 1 Variables
 		self.drone_qr_code = ""
 		self.last_rover_qr_read = ""
-		self.next_box_id = ""
+		self.next_box_id = "A"
 
 		# Maintaining box order
 		self.current_box = ""
+		self.next_box =""
 		self.previous_boxes = []
 		# self.next_box_id_pub = rospy.Publisher(NEXT_BOX_ID_TOPIC, String, queue_size=1000)
 		# self.correct_box_sub = rospy.Subscrbier(CORRECT_BOX_TOPIC, String, self.correct_box_callback)
@@ -136,18 +132,6 @@ class MasterController:
 
 	def lidar_box_angles_callback(self, boxes):
 		self.lidar_boxes = boxes.box_estimates
-		# print("boxes %s" % boxes)
-		# Process targeted box location 
-		# if self.mode == RobotMode('search'):
-		# 	if len(boxes) == 0:
-		# 		self.mode = RobotMode('fucked')
-		# 		return
-		# 	for box in boxes:
-		# 		self.mode = RobotMode('send_drone')
-		# 		if self.send_drone_to_box(box) == True:
-		# self.mode = RobotMode('approach')
-		# 			return
-		# 	self.mode = RobotMode('fucked')
 
 
 	def lidar_scan_callback(self, scan_data):
@@ -155,15 +139,17 @@ class MasterController:
 		self.front_lidar_scan = front_lidar_scan
 
 
-	def drone_qr_reader_callback(self, id):
-		self.drone_qr_code = id
+	def drone_qr_reader_callback(self, data):
+		self.drone_qr_code = data.data
+		print("Drone QR: ", self.drone_qr_code)
 
 	# Subscriber for the QR code
 	def qr_callback(self, data):
 		try:
+			self.next_box_id = data.data
 			self.last_rover_qr_read = data.data
-			rospy.loginfo(rospy.get_caller_id() + "QR: %s", data.data)
-			print(rospy.get_caller_id() + "QR: %s", data.data)
+			rospy.loginfo(rospy.get_caller_id() + "Rover QR: %s", data.data)
+			print(rospy.get_caller_id() + "Rover QR: %s", data.data)
 		except Exception as e:
 			print(e)
 
@@ -214,44 +200,6 @@ class MasterController:
 			# sys.stdout.write('Depth at center(%d, %d): %f(mm)\r' % (pix[0], pix[1], cv_image[pix[1], pix[0]]))    
 		except CvBridgeError as e:
 			print(e)
-
-
-	def send_drone_to_box(self, box):
-		found_box = False
-        
-		# drone.takeoff()
-
-		# Get IMU data from rover and drone to line up drone path
-		# realign_drone()
-
-		# drone.clockwise(DRONE_ROTATION_SPEED)
-		# sleep( scanned_box.theta / DRONE_ROTATION_SPEED )
-		# drone.counter_clockwise(0)
-
-		# drone.forward(DRONE_MOVEMENT_SPEED)
-		# sleep( scanned_box.distance / DRONE_MOVEMENT_SPEED )
-		# drone.backward(0)
-        
-		# Process QR Code
-		found_box = qr_code_id == self.get_drone_qr_code()
-
-		# Rebase Drone
-		# drone.backward(DRONE_MOVEMENT_SPEED)
-		# sleep( scanned_box.distance / DRONE_MOVEMENT_SPEED )
-		# drone.forward(0)
-
-		# # Realign drone
-		# drone.counter_clockwise(DRONE_ROTATION_SPEED)
-		# sleep( scanned_box.theta / DRONE_ROTATION_SPEED )
-		# drone.clockwise(0)
-
-		# # Process PANDA Rover QR code
-		# while qr_code_id != ROVER_HOME_QR_CODE:
-		#     # Arbitruary movement?
-		#     break
-		# drone.land()
-		# sleep(3)
-		return found_box
 
 
 	def get_drone_qr_code(self):
@@ -318,12 +266,12 @@ def send_drone(controller):
 	pass
 
 
-#def approach(controller):
-	#"""
-	#assumption: already facing the box.
-	#"""
-	#print("controller %s" % controller.opening_angle_orientation)
-	#pass
+# def approach(controller):
+# 	"""
+# 	assumption: already facing the box.
+# 	"""
+# 	print("[CONTROLLER] %s" % controller.opening_angle_orientation)
+# 	pass
 
 
 def enter(controller):
@@ -349,16 +297,30 @@ if __name__ == '__main__':
 	# TODO REMOVE THIS WHEN DONE TESTING
 	controller.mode = RobotMode.approach
 
-	while not rospy.is_shutdown() and controller.mode != RobotMode.done:
-		print("Looped", controller.mode)
+	rospy.sleep(3)
 
-		if controller.mode == RobotMode.search:
-			search(controller)
-			controller.mode = RobotMode.approach
+	print '[DEBUG] Reached!'
 
-		if controller.mode == RobotMode.approach:
-			approach(controller)
-			# TODO REMOVE THIS WHEN DONE TESTING
-			break
+	try:
 
-		rate.sleep()
+		while not rospy.is_shutdown() and controller.mode != RobotMode.done:
+			print("Looped", controller.mode)
+
+			if controller.mode == RobotMode.search:
+				search(controller)
+				controller.mode = RobotMode.approach
+
+			if controller.mode == RobotMode.approach:
+				approach(controller)
+				# TODO REMOVE THIS WHEN DONE TESTING
+				# break				
+
+			rospy.sleep(0.1)
+
+	except KeyboardInterrupt as _:
+		rospy.shutdown()
+
+	# 	rate.sleep()
+
+	# rospy.spin()
+

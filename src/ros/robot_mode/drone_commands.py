@@ -11,12 +11,12 @@ under catkin_install_python(PROGRAMS ...
 
 import rospy
 from std_msgs.msg import String
-# from fly_tello import FlyTello
+from fly_tello import FlyTello
 from time import sleep
-# import threading
+import threading
 
-import asyncio
-from tello_asyncio import Tello, Vector
+# import asyncio
+# from tello_asyncio import Tello, Vector
 
 ROSPY_RATE = 1
 
@@ -24,56 +24,67 @@ class TelloCommandDriver():
     def __init__(self):
         print("tello command driver init")
         drone_commands_topic = '/drone_commands'
-        # self.my_tellos = list()
-        # self.my_tellos.append('0TQZK5DED02JWM')
-        # self.fly = FlyTello(self.my_tellos, get_status=True)
-        self.drone = Tello()
+        self.my_tellos = list()
+        self.my_tellos.append('0TQZK5DED02JWM')
+        print(self.my_tellos)
+        print("FLY TELLO")
+        self.fly = FlyTello(self.my_tellos, get_status=True)
         self.sub = rospy.Subscriber(drone_commands_topic, String, self.drone_command_callback)
         print("callback check")
-        # self.t1 = threading.Thread(target=self.f)
-        # self.hover = False
+        self.t1 = threading.Thread(target=self.f)
+        self.hover = False
     
-    # def f(self):
-    #     while self.hover:
-    #         self.fly.down(dist=20)
-    #         sleep(2)
+    def f(self):
+        i = float(0)
+        while self.hover:
+            i = i + 1
+            print(i)
+            if i % 2 == 0:
+                self.fly.down(dist=20)
+            else:
+                self.fly.up(dist=20)
+            sleep(1)
 
 
-    def drone_command_callback(self, data):
+    def drone_command_callback(self, data): #async
         print(data)
 
         if data.data == "Land":
-            print("land")
-            pass
-            # self.fly 
+            print("land callback")
+            self.fly.land()
+            
         elif data.data == "Hover":
-            print("Starting hover thread")
-            for i in range(20):
-                self.fly.down(dist=20)
-                sleep(1)
+            print("Starting hover")
+            # for i in range(20):
+            #     print(i)
+            #     if i % 2 == 0:
+            #         self.fly.down(dist=20)
+            #     else:
+            #         self.fly.up(dist=20)
+            #     sleep(1)
             # self.hover = True
             # while self.hover:
             #     self.fly.flip("forward")
             #     sleep(4)
-            # if not self.hover and not self.t1.is_alive():
-            #     self.hover = True
-            #     self.t1.start()
+            if not self.hover and not self.t1.is_alive():
+                self.hover = True
+                self.t1.start()
         elif data.data == "End Hover":
             print("Ending hover thread")
             self.hover = False
             self.t1.join()
             print("Hover thread done")
         elif data.data == "Takeoff":
-            print("published takeoff")
+            # print("takeoff callback")
             # first_yaw = self.fly.get_status("yaw", tello=1, sync=True) # only record this the very first takeoff
             # print("first yaw: " + first_yaw)
-            # self.fly.takeoff()
-            # self.fly.up(dist=20)
-            # self.fly.forward(dist=30)   
-            await self.drone.wifi_wait_for_network(prompt=True)
-            await self.drone.connect()
-            await self.drone.takeoff()
-            await self.drone.land()
+            self.fly.takeoff()
+            self.fly.up(dist=20)
+            self.fly.forward(dist=45)
+            # await self.drone.wifi_wait_for_network(prompt=True)
+            # await self.drone.connect()
+            # await self.drone.takeoff()
+            # await self.drone.land()
         elif data.data == "Backward":
             self.fly.back(dist=80)    
             sleep(5)

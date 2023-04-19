@@ -22,5 +22,3 @@ my_tellos.append('0TQZK5DED02JWM')  # 1-Yellow
 # Control the flight
 with FlyTello(my_tellos, get_status=True) as fly:
     fly.rotate_cw(angle=0, tello=1)
-    fly.tello_mgr.wait_sync()
-    fly.tello_mgr.close_connections()

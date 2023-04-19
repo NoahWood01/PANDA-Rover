@@ -24,6 +24,7 @@ class CommsManager:
         # Socket for primary bi-directional communication with Tello
         self.control_port = 8889
         self.control_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # socket for sending cmd
+        self.control_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.control_socket.bind(('', self.control_port))
 
         # Socket for receiving status messages from Tello - not activated here
@@ -236,7 +237,7 @@ class CommsManager:
         # Add the command to the Tello's log first
         log_entry = tello.add_to_log(cmd_id, command, command_type, on_error)
 
-        # Then send the command
+        # Then send the command 
         self.control_socket.sendto(command.encode(), (tello.ip, self.control_port))
         print('[Command  %s]Sent cmd: %s' % (tello.ip, command))
 

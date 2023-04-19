@@ -1,5 +1,25 @@
 <launch>
-  <node name="image_reader" pkg="panda_rover" type="realsense_image.py" output="screen"/>
-  <node name="detection_model" pkg="panda_rover" type="object_detection_model.py" output="screen"/>
-  <node name="drone_commands" pkg="panda_rover" type="drone_commands.py" output="screen"/>
+  <!-- <include file="$(find realsense2_camera)/launch/rs_camera.launch" /> -->
+  <include file="$(find box_detection)/launch/rplidar_boxes.launch" />
+  <include file="$(find dynamixel_sdk_examples)/launch/motors.launch" />
+  <include file="$(find jetbot_ros)/launch/upwardcam.launch" />
+  <include file="$(find zbar_ros)/launch/qr_reader.launch" />
+  <include file="$(find imu_bno055)/launch/imu.launch" />
+
+  <node name="rplidarNode"          pkg="rplidar_ros"  type="rplidarNode">
+    <!-- <param name="serial_port"         type="string" value="/dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0"/> -->
+    <param name="serial_port"         type="string" value="/dev/rplidar"/>
+    <param name="serial_baudrate"     type="int"    value="115200"/><!--A1/A2 -->
+    <!--param name="serial_baudrate"     type="int"    value="256000"--><!--A3 -->
+    <param name="frame_id"            type="string" value="laser"/>
+    <param name="inverted"            type="bool"   value="false"/>
+    <param name="angle_compensate"    type="bool"   value="true"/>
+  </node>
+
+
+  <!-- <node name="image_reader" pkg="panda_rover" type="realsense_image.py" output="screen"/> -->
+  <!-- <node name="detection_model" pkg="panda_rover" type="object_detection_model.py" output="screen"/> -->
+  <node name="controller_node" pkg="panda_rover" type="controller.py" output="screen"/>
+  <node name="drone_command_node" pkg="panda_rover" type="drone_commands.py" output="screen"/>
 </launch>
+
